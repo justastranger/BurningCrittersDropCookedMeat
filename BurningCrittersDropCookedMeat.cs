@@ -85,7 +85,6 @@ namespace BurningCrittersDropCookedMeat
         [HarmonyPrefix]
         public static bool disapearAfterDeathAnimation_Prefix(Damageable __instance)
         {
-            BurningCrittersDropCookedMeat.Logger.LogMessage("disapearAfterDeathAnimation_Prefix");
             // if it's not an animal, skip to the normal function
             if (!__instance.isAnAnimal())
             {
