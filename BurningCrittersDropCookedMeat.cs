@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System.Collections.Generic;
@@ -21,18 +22,23 @@ namespace BurningCrittersDropCookedMeat
 
         internal static readonly Harmony harmony = new Harmony("jas.Dinkum.BurningCrittersDropCookedMeat");
 
+        internal static ConfigEntry<bool> affectAlphas;
+
         public void Awake()
         {
             instance = this;
             Logger = base.Logger;
             Logger.LogInfo("Mod jas.Dinkum.BurningCrittersDropCookedMeat is loaded!");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            affectAlphas = Config.Bind<bool>("config", "affectAlphas", false, "Determines whether alpha animals will drop cooked meat when on fire.");
         }
     }
 
     [HarmonyPatch(typeof(Damageable))]
     public class DamageablePatch
     {
+        internal static readonly HashSet<int> alphas = new HashSet<int> { 24, 25, 26, 38 };
+
 
         [HarmonyPatch(typeof(Damageable), "DropGuaranteedDrops")]
         [HarmonyPrefix]
@@ -87,6 +93,11 @@ namespace BurningCrittersDropCookedMeat
         {
             // if it's not an animal, skip to the normal function
             if (!__instance.isAnAnimal())
+            {
+                return true;
+            }
+            // ditto if it's an alpha but affectAlphas is false
+            if (!BurningCrittersDropCookedMeat.affectAlphas.Value && alphas.Contains(__instance.isAnAnimal().animalId))
             {
                 return true;
             }
